@@ -33,6 +33,9 @@
 
 * Worth noting for non-Mac users: in the package.json "scripts" for lint: line 9's has an extra " ' " surrounding src:... which allows es lint to access files recursively  "lint": "'eslint src/*.js'",
 
+## Random Commits
+- my first test commit
+
 ## Known Bugs
 
 * _Any known issues_
