@@ -43,4 +43,4 @@
 
 MIT License
 
-Copyright (c) [2023] [Eliot Gronstal]
+Copyright (c) [2023] Eliot Gronstal
