@@ -2,7 +2,7 @@
 
 #### (Brief Description of Application)
 
-#### By Eliot Gronstal
+#### By Eliot, Brishna, Stephen, Erin, and Justin
 
 ## Technologies Used
 
