@@ -42,11 +42,11 @@ async function handlePullRequestOpened({octokit, payload}) {
     });
   } catch (error) {
     if (error.response) {
-      console.error(`Error! Status: ${error.response.status}. Message: ${error.response.data.message}`)
+      console.error(`Error! Status: ${error.response.status}. Message: ${error.response.data.message}`);
     }
-    console.error(error)
+    console.error(error);
   }
-};
+}
 
 //This code sets up a webhook event listener.
 app.webhooks.on("pull_request.opened", handlePullRequestOpened);
@@ -80,5 +80,5 @@ const middleware = createNodeMiddleware(app.webhooks, {path});
 //This code creates a Node.js server that listens for incoming HTTP requests (including webhook payloads from GitHub) on the specified port. When the server receives a request, it executes the middleware function that you defined earlier. Once the server is running, it logs messages to the console to indicate that it is listening.
 http.createServer(middleware).listen(port, () => {
   console.log(`Server is listening for events at: ${localWebhookUrl}`);
-  console.log('Press Ctrl + C to quit.')
+  console.log('Press Ctrl + C to quit.');
 });
