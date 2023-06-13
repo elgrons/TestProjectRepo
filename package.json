@@ -1,5 +1,5 @@
 {
-  "name": "template-repo",
+  "name": "test-project-repo",
   "version": "1.0.0",
   "repository": {
     "url": "git+https://github.com/{USERNAME}/{REPONAME}.git"
@@ -13,7 +13,8 @@
     "lint": "'eslint src/*.js'",
     "test": "jest --coverage",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "server": "node app.js"
   },
   "keywords": [],
   "author": "",
