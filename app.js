@@ -24,47 +24,59 @@ const app = new App({
   },
 });
 
-//This code adds an event handler that you will call later. When this event handler is called, it will log the event to the console. Then, it will use GitHub's REST API to add a comment to the pull request that triggered the event.
-const messageForNewPRs =
-  "Thanks for opening a new PR! Please follow our contributing guidelines to make your PR easier to review.";
-
-async function handlePullRequestOpened({ octokit, payload }) {
-  console.log(
-    `Received a pull request event for #${payload.pull_request.number}`
-  );
-
+async function handlePushEvent({ octokit, payload }) {
   try {
-    await octokit.request(
-      "POST /repos/{owner}/{repo}/issues/{issue_number}/comments",
-      {
-        owner: payload.repository.owner.login,
-        repo: payload.repository.name,
-        issue_number: payload.pull_request.number,
-        body: messageForNewPRs,
-        headers: {
-          "x-github-api-version": "2022-11-28",
-        },
+      const { after, before, commits } = payload; // Destructure the necessary properties from the payload object
+      console.log("After:", after);
+      console.log("Before:", before);
+
+      // Process the commits
+      for (const commit of commits) {
+          const commitSHA = commit.id; // Access the SHA of each commit
+          console.log("Commit SHA:", commitSHA);
+
+          // Make additional requests or process the commit as needed
+          const commitDetails = await octokit.request(
+              "GET /repos/{owner}/{repo}/commits/{ref}",
+              {
+                  owner: payload.repository.owner.login,
+                  repo: payload.repository.name,
+                  ref: commitSHA,
+                  headers: {
+                      "x-github-api-version": "2022-11-28",
+                      Accept: "application/vnd.github+json",
+                  },
+              }
+          );
+
+          // Process the commit details
+          const commitMessage = commitDetails.data.commit.message;
+          const committer = commitDetails.data.commit.committer;
+          console.log("Committer:", committer);
+          console.log("Commit message:", commitMessage);
+          console.log("Commit details:", commitDetails);
       }
-    );
   } catch (error) {
-    if (error.response) {
-      console.error(
-        `Error! Status: ${error.response.status}. Message: ${error.response.data.message}`
-      );
-    }
-    console.error(error);
+      // Error handling
+      if (error.response && error.response.status) {
+          console.error(
+              `Error! Status: ${error.response.status}. Message: ${error.response.data.message}`
+          );
+      } else {
+          console.error("An error occurred:", error);
+      }
   }
 }
 
-//This code sets up a webhook event listener.
-app.webhooks.on("pull_request.opened", handlePullRequestOpened);
 
-//to handle errors.
+app.webhooks.on("push", handlePushEvent);
+// app.webhooks.on("pull_request.opened", handlePullRequestOpened);
+
 app.webhooks.onError((error) => {
   if (error.name === "AggregateError") {
-    console.error(`Error processing request: ${error.event}`);
+      console.error(`Error processing request: ${error.event}`);
   } else {
-    console.error(error);
+      console.error(error);
   }
 });
 
