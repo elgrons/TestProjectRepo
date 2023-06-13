@@ -3,6 +3,7 @@ import { App } from "octokit";
 import { createNodeMiddleware } from "@octokit/webhooks";
 import fs from "fs";
 import http from "http";
+import axios from "axios"; 
 
 //This will read your .env file and add the variables from that file to the process.env object in Node.js
 dotenv.config();
@@ -11,6 +12,7 @@ dotenv.config();
 const appId = process.env.APP_ID;
 const webhookSecret = process.env.WEBHOOK_SECRET;
 const privateKeyPath = process.env.PRIVATE_KEY_PATH;
+const openAiKey = process.env.OPEN_AI_KEY;
 
 //read the contents of your private key file
 const privateKey = fs.readFileSync(privateKeyPath, "utf8");
@@ -55,22 +57,38 @@ async function handlePushEvent({ octokit, payload }) {
           console.log("Committer:", committer);
           console.log("Commit message:", commitMessage);
           console.log("Commit details:", commitDetails);
-      }
-  } catch (error) {
-      // Error handling
-      if (error.response && error.response.status) {
-          console.error(
-              `Error! Status: ${error.response.status}. Message: ${error.response.data.message}`
-          );
-      } else {
-          console.error("An error occurred:", error);
-      }
-  }
+          } 
+      
+      const openAiResponse = await axios.post("https://api.openai.com/v1/chat/completions",
+        {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {
+                "role": "system",
+                "content": "Please summarize the following GitHub commit messages."
+            },
+            {
+                "role": "user",
+                "content": "test test testing"
+            }
+        ]
+    }, 
+    {
+      headers: {
+        'Authorization': `Bearer ${openAiKey}`,
+        'Content-Type': 'application/json'
+    }
+  });
+
+  // Handle the OpenAI response
+  const aiMessage = openAiResponse.data.choices[0].message.content;
+  console.log("AI Message:", aiMessage);
+} catch (error) {
+  console.error(`An error occurred: ${error.message}`);
+}
 }
 
-
 app.webhooks.on("push", handlePushEvent);
-// app.webhooks.on("pull_request.opened", handlePullRequestOpened);
 
 app.webhooks.onError((error) => {
   if (error.name === "AggregateError") {
@@ -79,6 +97,7 @@ app.webhooks.onError((error) => {
       console.error(error);
   }
 });
+
 
 //to determine where your server will listen
 const port = 3000;
